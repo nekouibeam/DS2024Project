@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+ <title>BMI 計算器</title>
+ <meta charset="UTF-8">
+ <style>
+     body {
+         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+         background-color: #f4f6f9;
+         display: flex;
+         justify-content: center;
+         align-items: center;
+         height: 100vh;
+         margin: 0;
+     }
+     .container {
+         background-color: #ffffff;
+         padding: 30px 40px;
+         border-radius: 10px;
+         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+         max-width: 400px;
+         width: 100%;
+     }
+     h2 {
+         text-align: center;
+         color: #333333;
+         margin-bottom: 20px;
+     }
+     label {
+         display: block;
+         margin-top: 15px;
+         color: #555555;
+     }
+     input {
+         width: 100%;
+         padding: 12px 15px;
+         margin-top: 5px;
+         border: 1px solid #cccccc;
+         border-radius: 5px;
+         box-sizing: border-box;
+         font-size: 16px;
+     }
+     button {
+         width: 100%;
+         padding: 12px 15px;
+         margin-top: 20px;
+         background-color: #007BFF;
+         border: none;
+         border-radius: 5px;
+         color: #ffffff;
+         font-size: 16px;
+         cursor: pointer;
+         transition: background-color 0.3s ease;
+     }
+     button:hover {
+         background-color: #0056b3;
+     }
+     hr {
+         margin: 30px 0;
+         border: none;
+         border-top: 1px solid #eeeeee;
+     }
+     #apiResult {
+         margin-top: 20px;
+         font-size: 18px;
+         color: #333333;
+         text-align: center;
+     }
+ </style>
+</head>
+<body>
+<div class="container">
+ <h2>BMI 計算器</h2>
+ <h2>112306065李元中</h2>
+ <h3>使用API計算BMI</h3>
+ <form id="bmiApiForm">
+     <label for="apiHeight">身高（公分）:</label>
+     <input type="number" id="apiHeight" name="height" min="50" max="300" required placeholder="例如: 170">
+
+     <label for="apiWeight">體重（公斤）:</label>
+     <input type="number" id="apiWeight" name="weight" min="10" max="500" required placeholder="例如: 65">
+
+     <button type="button" onclick="callBmiApi()">計算BMI</button>
+ </form>
+
+ <p id="apiResult"></p>
+</div>
+
+<script>
+ function callBmiApi() {
+     const height = document.getElementById('apiHeight').value;
+     const weight = document.getElementById('apiWeight').value;
+
+     if (!height || !weight) {
+         alert('請填寫所有欄位。');
+         return;
+     }
+
+     fetch(`/api/bmi?height=${height}&weight=${weight}`)
+         .then(response => {
+             if (!response.ok) {
+                 throw new Error('網路回應不是OK');
+             }
+             return response.json();
+         })
+         .then(data => {
+             document.getElementById('apiResult').innerText = `BMI: ${data.bmi.toFixed(2)} (${data.category})`;
+         })
+         .catch(error => {
+             console.error('Error:', error);
+             document.getElementById('apiResult').innerText = '計算失敗，請檢查輸入值。';
+         });
+ }
+</script>
+</body>
+</html>
