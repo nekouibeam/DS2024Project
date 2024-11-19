@@ -21,9 +21,9 @@
             const resultsDiv = document.getElementById("results");
             resultsDiv.innerHTML = ""; // 清空先前的結果
 
-            for (const [title, url] of Object.entries(results)) {
+            for (const [webTree, url] of Object.entries(results)) {
                 const resultItem = document.createElement("p");
-                resultItem.innerHTML = `<strong>${title}</strong>: <a href="${url}" target="_blank">${url}</a>`;
+                resultItem.innerHTML = `<strong>${webTree.name}</strong>: <a href="${url}" target="_blank">${url}</a>`;
                 resultsDiv.appendChild(resultItem);
             }
         }

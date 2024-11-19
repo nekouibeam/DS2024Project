@@ -6,106 +6,104 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
+import java.util.TreeMap;
+import java.util.Comparator;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-public class GoogleQuery 
-{
-    public String searchKeyword;
-    public String url;
-    public String content;
+import webFiliting.*;
 
-    public GoogleQuery(String searchKeyword)
-    {
-        this.searchKeyword = searchKeyword;
-        try 
-        {
-            // This part has been specially handled for Chinese keyword processing. 
-            // You can comment out the following two lines 
-            // and use the line of code in the lower section. 
-            // Also, consider why the results might be incorrect 
-            // when entering Chinese keywords.
-            String encodeKeyword=java.net.URLEncoder.encode(searchKeyword,"utf-8");
-            this.url = "https://www.google.com/search?q="+encodeKeyword+"&oe=utf8&num=20";
+public class GoogleQuery {
+	public String searchKeyword;
+	public String url;
+	public String content;
 
-            // this.url = "https://www.google.com/search?q="+searchKeyword+"&oe=utf8&num=20";
-        }
-        catch (Exception e)
-        {
-            System.out.println(e.getMessage());
-        }
-    }
+	public GoogleQuery(String searchKeyword) {
+		this.searchKeyword = searchKeyword;
+		try {
+			// This part has been specially handled for Chinese keyword processing.
+			// You can comment out the following two lines
+			// and use the line of code in the lower section.
+			// Also, consider why the results might be incorrect
+			// when entering Chinese keywords.
+			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
+			this.url = "https://www.google.com/search?q=" + encodeKeyword + "&oe=utf8&num=20";
 
-    private String fetchContent() throws IOException
-    {
-        String retVal = "";
+			// this.url =
+			// "https://www.google.com/search?q="+searchKeyword+"&oe=utf8&num=20";
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+	}
 
-        URL u = new URL(url);
-        URLConnection conn = u.openConnection();
-        //set HTTP header
-        conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
-        InputStream in = conn.getInputStream();
+	private String fetchContent() throws IOException {
+		String retVal = "";
 
-        InputStreamReader inReader = new InputStreamReader(in, "utf-8");
-        BufferedReader bufReader = new BufferedReader(inReader);
-        String line = null;
+		URL u = new URL(url);
+		URLConnection conn = u.openConnection();
+		// set HTTP header
+		conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
+		InputStream in = conn.getInputStream();
 
-        while((line = bufReader.readLine()) != null)
-        {
-            retVal += line;
-        }
-        return retVal;
-    }
+		InputStreamReader inReader = new InputStreamReader(in, "utf-8");
+		BufferedReader bufReader = new BufferedReader(inReader);
+		String line = null;
 
-    public HashMap<String, String> query() throws IOException
-    {
-        if(content == null)
-        {
-            content = fetchContent();
-        }
+		while ((line = bufReader.readLine()) != null) {
+			retVal += line;
+		}
+		return retVal;
+	}
 
-        HashMap<String, String> retVal = new HashMap<String, String>();
+	public TreeMap<WebTree, String> query() throws IOException {
+		if (content == null) {
+			content = fetchContent();
+		}
 
-        /* 
-         * some Jsoup source
-         * https://jsoup.org/apidocs/org/jsoup/nodes/package-summary.html
-         * https://www.1ju.org/jsoup/jsoup-quick-start
-         */
+		Comparator<WebTree> comparator = new Comparator<WebTree>() {
 
-        //using Jsoup analyze html string
-        Document doc = Jsoup.parse(content);
+			@Override
+			public int compare(WebTree x, WebTree y) {
+				// 降序排列
+				return (int) (y.root.nodeScore - x.root.nodeScore);
+			}
+		};
+		TreeMap<WebTree, String> webs = new TreeMap<WebTree, String>(comparator);
 
-        //select particular element(tag) which you want 
-        Elements lis = doc.select("div");
-        lis = lis.select(".kCrYT");
+		/*
+		 * some Jsoup source
+		 * https://jsoup.org/apidocs/org/jsoup/nodes/package-summary.html
+		 * https://www.1ju.org/jsoup/jsoup-quick-start
+		 */
 
-        for(Element li : lis)
-        {
-            try 
-            {
-                String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
-                String title = li.select("a").get(0).select(".vvjwJb").text();
+		// using Jsoup analyze html string
+		Document doc = Jsoup.parse(content);
 
-                if(title.equals("")) 
-                {
-                    continue;
-                }
+		// select particular element(tag) which you want
+		Elements lis = doc.select("div");
+		lis = lis.select(".kCrYT");
 
-                System.out.println("Title: " + title + " , url: " + citeUrl);
+		for (Element li : lis) {
+			try {
+				String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
+				String title = li.select("a").get(0).select(".vvjwJb").text();
 
-                //put title and pair into HashMap
-                retVal.put(title, citeUrl);
+				if (title.equals("")) {
+					continue;
+				}
 
-            } catch (IndexOutOfBoundsException e) 
-            {
+				System.out.println("Title: " + title + " , url: " + citeUrl);
+
+				// put title and pair into HashMap
+				webs.put(new WebTree(new WebPage(citeUrl, title)), citeUrl);
+
+			} catch (IndexOutOfBoundsException e) {
 //				e.printStackTrace();
-            }
-        }
-
-        return retVal;
-    }
+			}
+		}
+		return webs;
+	}
 }
