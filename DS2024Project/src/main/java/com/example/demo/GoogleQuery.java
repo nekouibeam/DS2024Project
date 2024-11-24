@@ -4,9 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLDecoder;
+import java.net.UnknownHostException;
 import java.util.TreeMap;
+import java.util.ArrayList;
 import java.util.Comparator;
 
 import org.jsoup.Jsoup;
@@ -20,9 +24,14 @@ public class GoogleQuery {
 	public String searchKeyword;
 	public String url;
 	public String content;
+	public static ArrayList<Keyword> keywordList;
 
 	public GoogleQuery(String searchKeyword) {
 		this.searchKeyword = searchKeyword;
+		createKeywordList();
+		for (Keyword keyword : keywordList) {
+			System.out.println(keyword.name);
+		}
 		try {
 			// This part has been specially handled for Chinese keyword processing.
 			// You can comment out the following two lines
@@ -89,6 +98,11 @@ public class GoogleQuery {
 		for (Element li : lis) {
 			try {
 				String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
+				citeUrl = URLDecoder.decode(citeUrl, "UTF-8");
+				int index = citeUrl.indexOf("&");
+				if (index != -1) {
+					citeUrl = citeUrl.substring(0, index);
+				}
 				String title = li.select("a").get(0).select(".vvjwJb").text();
 
 				if (title.equals("")) {
@@ -98,12 +112,40 @@ public class GoogleQuery {
 				System.out.println("Title: " + title + " , url: " + citeUrl);
 
 				// put title and pair into HashMap
-				webs.put(new WebTree(new WebPage(citeUrl, title)), citeUrl);
+				if (isValidURL(citeUrl)) {
+					webs.put(new WebTree(new WebPage(citeUrl, title)), citeUrl);
+				}
 
 			} catch (IndexOutOfBoundsException e) {
-//				e.printStackTrace();
+				continue;
 			}
 		}
 		return webs;
+	}
+
+	private boolean isValidURL(String citeUrl) {
+		try {
+			URLConnection conn = new URL(citeUrl).openConnection();
+		} catch (MalformedURLException e) {
+			System.out.printf("MalformedURLException, skip");
+			return false;
+		} catch (UnknownHostException e) {
+			System.out.printf("UnknownHostException, skip");
+			return false;
+		} catch (IOException e) {
+			System.out.printf("IOException, skip");
+			return false;
+		}
+		return true;
+	}
+
+	public static void createKeywordList(){
+		keywordList = new ArrayList<>();
+		keywordList.add(new Keyword("ISBN", 20));
+		keywordList.add(new Keyword("作者", 15));
+		keywordList.add(new Keyword("書評", 15));
+		keywordList.add(new Keyword("免費觀看", 12));
+		keywordList.add(new Keyword("付費觀看", 10));
+		keywordList.add(new Keyword("同人作品", 8));
 	}
 }
