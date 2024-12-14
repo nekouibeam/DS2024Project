@@ -4,23 +4,34 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
-import java.util.HashMap;
+import java.net.UnknownHostException;
+import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import webFiliting.*;
+
 public class GoogleQuery {
 	public String searchKeyword;
 	public String url;
 	public String content;
+	public static ArrayList<Keyword> keywordList;
 
 	public GoogleQuery(String searchKeyword) {
 		this.searchKeyword = searchKeyword;
+		createKeywordList();
+		for (Keyword keyword : keywordList) {
+			System.out.println(keyword.name);
+		}
 		try {
 			// This part has been specially handled for Chinese keyword processing.
 			// You can comment out the following two lines
@@ -43,6 +54,7 @@ public class GoogleQuery {
 		URL u = new URL(url);
 		URLConnection conn = u.openConnection();
 		// set HTTP header
+		//當程式需要以自動化方式訪問網頁時，使用 User-Agent 模擬瀏覽器，讓伺服器誤認為這是一個真實的瀏覽器訪問。
 		conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
 		InputStream in = conn.getInputStream();
 
@@ -56,18 +68,24 @@ public class GoogleQuery {
 		return retVal;
 	}
 
-	public HashMap<String, String> query() throws IOException {
+	public TreeMap<WebTree, String> query() throws IOException {
 		if (content == null) {
 			content = fetchContent();
 		}
+		Comparator<WebTree> comparator = new Comparator<WebTree>() {
 
-		HashMap<String, String> retVal = new HashMap<String, String>();
-
+			@Override
+			public int compare(WebTree x, WebTree y) {
+				// 降序排列
+				return (int) (y.getRoot().nodeScore - x.getRoot().nodeScore);
+			}
+		};
+		TreeMap<WebTree, String> webs = new TreeMap<WebTree, String>(comparator);
+		// using Jsoup analyze html string
 		Document doc = Jsoup.parse(content);
-
+		// select particular element(tag) which you want
 		Elements lis = doc.select("div");
 		lis = lis.select(".kCrYT");
-
 		for (Element li : lis) {
 			try {
 				String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
@@ -84,13 +102,41 @@ public class GoogleQuery {
 
 				System.out.println("Title: " + title + " , url: " + citeUrl);
 
-				retVal.put(title, citeUrl);
+				// put title and pair into HashMap
+				if (isValidURL(citeUrl)) {
+					webs.put(new WebTree(new WebPage(citeUrl, title)), citeUrl);
+				}
 
 			} catch (IndexOutOfBoundsException e) {
-				// e.printStackTrace();
+				continue;
 			}
 		}
+		return webs;
+	}
 
-		return retVal;
+	private boolean isValidURL(String citeUrl) {
+		try {
+			URLConnection conn = new URL(citeUrl).openConnection();
+		} catch (MalformedURLException e) {
+			System.out.printf("MalformedURLException, skip");
+			return false;
+		} catch (UnknownHostException e) {
+			System.out.printf("UnknownHostException, skip");
+			return false;
+		} catch (IOException e) {
+			System.out.printf("IOException, skip");
+			return false;
+		}
+		return true;
+	}
+
+	public static void createKeywordList() {
+		keywordList = new ArrayList<>();
+		keywordList.add(new Keyword("ISBN", 20));
+		keywordList.add(new Keyword("作者", 15));
+		keywordList.add(new Keyword("書評", 15));
+		keywordList.add(new Keyword("免費觀看", 12));
+		keywordList.add(new Keyword("付費觀看", 10));
+		keywordList.add(new Keyword("同人作品", 8));
 	}
 }

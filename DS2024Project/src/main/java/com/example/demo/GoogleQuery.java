@@ -54,6 +54,7 @@ public class GoogleQuery {
 		URL u = new URL(url);
 		URLConnection conn = u.openConnection();
 		// set HTTP header
+		//當程式需要以自動化方式訪問網頁時，使用 User-Agent 模擬瀏覽器，讓伺服器誤認為這是一個真實的瀏覽器訪問。
 		conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
 		InputStream in = conn.getInputStream();
 
@@ -71,30 +72,20 @@ public class GoogleQuery {
 		if (content == null) {
 			content = fetchContent();
 		}
-
 		Comparator<WebTree> comparator = new Comparator<WebTree>() {
 
 			@Override
 			public int compare(WebTree x, WebTree y) {
 				// 降序排列
-				return (int) (y.root.nodeScore - x.root.nodeScore);
+				return (int) (y.getRoot().nodeScore - x.getRoot().nodeScore);
 			}
 		};
 		TreeMap<WebTree, String> webs = new TreeMap<WebTree, String>(comparator);
-
-		/*
-		 * some Jsoup source
-		 * https://jsoup.org/apidocs/org/jsoup/nodes/package-summary.html
-		 * https://www.1ju.org/jsoup/jsoup-quick-start
-		 */
-
 		// using Jsoup analyze html string
 		Document doc = Jsoup.parse(content);
-
 		// select particular element(tag) which you want
 		Elements lis = doc.select("div");
 		lis = lis.select(".kCrYT");
-
 		for (Element li : lis) {
 			try {
 				String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
@@ -139,7 +130,7 @@ public class GoogleQuery {
 		return true;
 	}
 
-	public static void createKeywordList(){
+	public static void createKeywordList() {
 		keywordList = new ArrayList<>();
 		keywordList.add(new Keyword("ISBN", 20));
 		keywordList.add(new Keyword("作者", 15));
