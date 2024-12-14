@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry excluding="JSoup_testing/src/|demo1/src/test/java/|HW6/src/|demo1/src/main/java/" kind="src" path=""/>
+	<classpathentry kind="src" path="demo1/src/main/java"/>
+	<classpathentry kind="src" path="demo1/src/test/java"/>
+	<classpathentry kind="src" path="HW6/src"/>
+	<classpathentry kind="src" path="JSoup_testing/src"/>
+	<classpathentry kind="output" path="HW6/bin"/>
+</classpath>
