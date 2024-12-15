@@ -1,59 +1,46 @@
 package webFiliting;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.UnknownHostException;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+
 public class WordCounter {
-    private String urlStr;
-    private String content;
+	private String content;
 
-    public WordCounter(String urlStr) {
-        this.urlStr = urlStr;
-    }
+	public WordCounter(String content) {
+		this.content = content;
+	}
 
-    private String fetchContent() throws IOException, UnknownHostException {
-    	String retVal = "";
-    	URL url = new URL(this.urlStr);
-		URLConnection conn = url.openConnection();
-		// set HTTP header
-		//當程式需要以自動化方式訪問網頁時，使用 User-Agent 模擬瀏覽器，讓伺服器誤認為這是一個真實的瀏覽器訪問。
-		conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
-		InputStream in = conn.getInputStream();
+	public int countKeyword(String keyword) throws IOException, UnknownHostException {
 
-		InputStreamReader inReader = new InputStreamReader(in, "utf-8");
-		BufferedReader bufReader = new BufferedReader(inReader);
-		String line = null;
+		// Use Jsoup to parse HTML and extract <body> content
+		Document doc = Jsoup.parse(content);
+		Element body = doc.body();
 
-		while ((line = bufReader.readLine()) != null) {
-			retVal += line;
+		if (body == null) {
+			System.out.println("No <body> content found in the URL: ");
+			return 0;
 		}
+
+		String bodyText = body.text(); // Extract plain text from <body>
+		bodyText = bodyText.toUpperCase();
+		keyword = keyword.toUpperCase();
+
+		int retVal = 0;
+		int fromIdx = 0;
+		int found;
+
+		// Count keyword occurrences in the <body> text
+		while ((found = bodyText.indexOf(keyword, fromIdx)) != -1) {
+			retVal++;
+			fromIdx = found + keyword.length();
+		}
+
+		System.out.println("Keyword '" + keyword + "' found " + retVal + " times in <body> of URL.");
+
 		return retVal;
-    }
-
-    public int countKeyword(String keyword) throws IOException, UnknownHostException {
-        if (content == null) {
-            content = fetchContent();
-        }
-
-        content = content.toUpperCase();
-        keyword = keyword.toUpperCase();
-
-        int retVal = 0;
-        int fromIdx = 0;
-        int found;
-
-        while ((found = content.indexOf(keyword, fromIdx)) != -1) {
-            retVal++;
-            fromIdx = found + keyword.length();
-        }
-
-        System.out.println("Keyword '" + keyword + "' found " + retVal + " times in URL: " + this.urlStr);
-
-        return retVal;
-    }
+	}
 }

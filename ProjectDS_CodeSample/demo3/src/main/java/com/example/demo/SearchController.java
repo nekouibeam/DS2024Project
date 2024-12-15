@@ -20,11 +20,17 @@ public class SearchController {
 	    GoogleQuery googleQuery = new GoogleQuery(keyword);
 	    List<Map<String, String>> formattedResults = new ArrayList<>();
 	    
+	    //for testing
+	    System.out.println("output all scores:");
+	    
 	    try {
 	        Map<WebTree, String> results = googleQuery.query();
 	        for (Map.Entry<WebTree, String> entry : results.entrySet()) {
 	            WebTree webTree = entry.getKey();
 	            String url = entry.getValue();
+	            
+	            //for testing
+	    	    System.out.println(webTree.getRoot().webPage.score);
 	            
 	            // 將 WebTree 和 URL 組裝成結構化 JSON
 	            Map<String, String> formattedEntry = new HashMap<>();
@@ -40,6 +46,15 @@ public class SearchController {
 	        formattedResults.add(errorEntry);
 	    }
 	    
+	    //for testing
+	    System.out.println("Formatted Results:");
+    	for (Map<String, String> result : formattedResults) {
+    	    System.out.println("Title: " + result.get("title"));
+    	    System.out.println("URL: " + result.get("url"));
+    	    System.out.println("----------------------");
+    	}
+    	
+    	//return
 	    return formattedResults;
 	}
 

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Demo</title>
 </head>
+
 <body>
     <h1>Google Search Results</h1>
     <input type="text" id="searchKeyword" placeholder="Enter keyword">
@@ -14,22 +16,33 @@
 
     <script>
         async function search() {
-        const keyword = document.getElementById("searchKeyword").value;
-        const response = await fetch(`/search?keyword=${encodeURIComponent(keyword)}`);
-        const results = await response.json();
-        
-        const resultsDiv = document.getElementById("results");
-        resultsDiv.innerHTML = ""; // 清空先前的結果
+            const keyword = document.getElementById("searchKeyword").value;
+            const response = await fetch(`/search?keyword=${encodeURIComponent(keyword)}`);
+            
+            try {
+                const results = await response.json();
 
-        for (const title in results) {
-            if (results.hasOwnProperty(title)) {
-                const url = results[title];
-                const resultItem = document.createElement("p");
-                resultItem.innerHTML = `<strong>${title}</strong>: <a href="${url}" target="_blank">${url}</a>`;
-                resultsDiv.appendChild(resultItem);
+                const resultsDiv = document.getElementById("results");
+                resultsDiv.innerHTML = ""; // 每次清空之前的結果
+
+                // 正確遍歷數組
+                results.forEach(item => {
+                    const title = item.title;
+                    const url = item.url;
+
+                    const resultItem = document.createElement("p");
+                    resultItem.innerHTML = `<strong>${title}</strong>: <a href="${url}" target="_blank">${url}</a>`;
+                    resultsDiv.appendChild(resultItem);
+                });
+                
+            } catch (error) {
+                console.error("Failed to fetch results:", error);
+                const errorItem = document.createElement("p");
+                errorItem.innerText = "An error occurred while fetching search results.";
+                resultsDiv.appendChild(errorItem);
             }
         }
-    }
     </script>
 </body>
+
 </html>

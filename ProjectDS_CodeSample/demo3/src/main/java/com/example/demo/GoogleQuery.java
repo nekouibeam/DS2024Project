@@ -26,6 +26,7 @@ public class GoogleQuery {
 	public String content;
 	public static ArrayList<Keyword> keywordList;
 
+	
 	public GoogleQuery(String searchKeyword) {
 		this.searchKeyword = searchKeyword;
 		createKeywordList();
@@ -38,7 +39,7 @@ public class GoogleQuery {
 			// and use the line of code in the lower section.
 			// Also, consider why the results might be incorrect
 			// when entering Chinese keywords.
-			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
+			String encodeKeyword = java.net.URLEncoder.encode((searchKeyword + " 小說"), "utf-8");
 			this.url = "https://www.google.com/search?q=" + encodeKeyword + "&oe=utf8&num=20";
 
 			// this.url =
@@ -73,12 +74,11 @@ public class GoogleQuery {
 			content = fetchContent();
 		}
 		Comparator<WebTree> comparator = new Comparator<WebTree>() {
-
-			@Override
-			public int compare(WebTree x, WebTree y) {
-				// 降序排列
-				return (int) (y.getRoot().nodeScore - x.getRoot().nodeScore);
-			}
+		    @Override
+		    public int compare(WebTree x, WebTree y) {
+		        // 使用 Double.compare 方法比較分數以避免強制轉換錯誤
+		        return Double.compare(y.getRoot().nodeScore, x.getRoot().nodeScore);
+		    }
 		};
 		TreeMap<WebTree, String> webs = new TreeMap<WebTree, String>(comparator);
 		// using Jsoup analyze html string
@@ -102,7 +102,7 @@ public class GoogleQuery {
 
 				System.out.println("Title: " + title + " , url: " + citeUrl);
 
-				// put title and pair into HashMap
+				// put title and pair into TreeMap
 				if (isValidURL(citeUrl)) {
 					webs.put(new WebTree(new WebPage(citeUrl, title)), citeUrl);
 				}
@@ -135,8 +135,8 @@ public class GoogleQuery {
 		keywordList.add(new Keyword("ISBN", 20));
 		keywordList.add(new Keyword("作者", 15));
 		keywordList.add(new Keyword("書評", 15));
-		keywordList.add(new Keyword("免費觀看", 12));
-		keywordList.add(new Keyword("付費觀看", 10));
-		keywordList.add(new Keyword("同人作品", 8));
+		//keywordList.add(new Keyword("免費觀看", 12));
+		//keywordList.add(new Keyword("付費觀看", 10));
+		//keywordList.add(new Keyword("同人作品", 8));
 	}
 }
