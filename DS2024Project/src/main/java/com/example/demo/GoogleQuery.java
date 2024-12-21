@@ -26,7 +26,7 @@ public class GoogleQuery {
 	public String content;
 	public static ArrayList<Keyword> keywordList;
 
-	public GoogleQuery(String searchKeyword) {
+	public GoogleQuery(String searchKeyword, String searchType) {
 		this.searchKeyword = searchKeyword;
 		createKeywordList();
 		for (Keyword keyword : keywordList) {
