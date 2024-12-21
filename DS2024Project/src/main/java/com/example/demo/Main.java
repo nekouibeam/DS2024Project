@@ -6,6 +6,7 @@ public class Main
 {
     public static void main(String[] args) 
     {
+        GoogleQuery googleQuery= new GoogleQuery("Tomato");
         try 
         {
             /*
@@ -16,7 +17,7 @@ public class Main
              * 6,7:Tissue
              * 8,9:Process
              */
-            System.out.println(new GoogleQuery("Tomato").query());
+            System.out.println(googleQuery.query());
 //			System.out.println(new GoogleQuery("µf­X").query());
         } 
         catch (IOException e) 
