@@ -12,6 +12,55 @@
 
 .result-card {
     transition: transform 0.2s, box-shadow 0.2s;
+}.logo {
+    font-family: 'Pacifico', cursive;
+    background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-container {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+.search-container:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.search-container input {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+}
+
+.suggested-keywords {
+    color: #4285f4;
+    transition: color 0.3s ease;
+}
+
+.suggested-keywords a:hover {
+    color: #1a73e8;
+    text-decoration: underline;
+}
+
+.category-pills span {
+    transition: all 0.3s ease;
+}
+
+.category-pills span:hover {
+    background-color: #f1f5f9;
+    cursor: pointer;
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .result-card:hover {
@@ -70,4 +119,33 @@
     outline: none;
     font-size: 16px;
     padding: 8px 12px;
+}
+.logo {
+    font-family: 'Pacifico', cursive;
+    background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.search-result {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-result:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.related-keyword {
+    transition: color 0.3s ease;
+}
+
+.related-keyword:hover {
+    color: #1a73e8;
+}
+
+.top-search-bar {
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.95);
 }

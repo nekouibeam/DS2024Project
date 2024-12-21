@@ -5,14 +5,26 @@ async function performSearch(inputId) {
         return;
     }
 
+    console.log('Performing search with keyword:', keyword);
+
     // 隱藏初始頁面，顯示結果頁面
     document.getElementById('initialSearchPage').classList.add('hidden');
     document.getElementById('resultsPage').classList.remove('hidden');
 
     // 發送 API 請求到後端
     try {
-        const response = await fetch(`/search?keyword=${encodeURIComponent(keyword)}`);
+        const response = await fetch(`/search?keyword=${encodeURIComponent(keyword)}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        console.log('API request sent, awaiting response...');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const results = await response.json();
+        console.log('API response received:', results);
 
         // 更新結果計數
         const resultCount = results.length;
@@ -39,6 +51,7 @@ async function performSearch(inputId) {
 
     } catch (error) {
         console.error('Error fetching search results:', error);
-        alert('搜尋過程中發生錯誤，請稍後再試。');
+        console.error('Error details:', error);
+        alert(`搜尋過程中發生錯誤，請稍後再試。錯誤訊息: ${error.message}`);
     }
 }
