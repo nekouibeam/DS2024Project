@@ -39,7 +39,7 @@ public class WordCounter {
 			fromIdx = found + keyword.length();
 		}
 
-		System.out.println("Keyword '" + keyword + "' found " + retVal + " times in <body> of URL.");
+		//System.out.println("Keyword '" + keyword + "' found " + retVal + " times in <body> of URL.");
 
 		return retVal;
 	}

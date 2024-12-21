@@ -1,6 +1,7 @@
 package webFiliting;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 
 public class WebNode {
@@ -9,7 +10,7 @@ public class WebNode {
 	public WebPage webPage;
 	public double nodeScore = 0;// This node's score += all its children's nodeScore
 
-	public WebNode(WebPage webPage)
+	public WebNode(WebPage webPage) 
 	{
 		this.webPage = webPage;
 		this.children = new ArrayList<WebNode>();
@@ -26,7 +27,7 @@ public class WebNode {
 		}
 	}
 
-	public void addChild(WebNode child){
+	public void addChild(WebNode child) throws SocketTimeoutException{
 		// add the WebNode to its children list
 		this.children.add(child);
 		child.parent = this;

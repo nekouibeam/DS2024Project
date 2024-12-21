@@ -1,12 +1,14 @@
 package webFiliting;
 
+import org.jsoup.HttpStatusException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 public class FetchHtmlContent {
 
-    public String fetchContent(String url) throws IOException {
+    public String fetchContent(String url) throws IOException, SocketTimeoutException, HttpStatusException{
         String retVal = "";
 
         // 使用 Jsoup 訪問網頁並設置 User-Agent
