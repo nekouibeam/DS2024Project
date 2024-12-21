@@ -27,7 +27,7 @@ public class GoogleQuery {
 	public String content;
 	public static ArrayList<Keyword> keywordList;
 
-	public GoogleQuery(String searchKeyword) {
+	public GoogleQuery(String searchKeyword, String searchType) {
 		this.searchKeyword = searchKeyword;
 		createKeywordList();
 		for (Keyword keyword : keywordList) {
@@ -39,7 +39,7 @@ public class GoogleQuery {
 			// and use the line of code in the lower section.
 			// Also, consider why the results might be incorrect
 			// when entering Chinese keywords.
-			String encodeKeyword = java.net.URLEncoder.encode((searchKeyword + " 小說"), "utf-8");
+			String encodeKeyword = java.net.URLEncoder.encode((searchKeyword + searchType), "utf-8");
 			this.url = "https://www.google.com/search?q=" + encodeKeyword + "&oe=utf8&num=20";
 
 			// this.url =

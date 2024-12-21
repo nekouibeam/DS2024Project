@@ -17,7 +17,7 @@ public class SearchController {
 
 	@GetMapping("/search")
 	public List<Map<String, String>> search(@RequestParam String keyword) {
-	    GoogleQuery googleQuery = new GoogleQuery(keyword);
+	    GoogleQuery googleQuery = new GoogleQuery(keyword," 小說");
 	    List<Map<String, String>> formattedResults = new ArrayList<>();
 	    
 	    //for testing
