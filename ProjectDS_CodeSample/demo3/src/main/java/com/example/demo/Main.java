@@ -55,6 +55,10 @@ public class Main
         	webs.put(tree2,"https://zh.moegirl.org.cn/zh-tw/%E5%88%80%E5%89%91%E7%A5%9E%E5%9F%9F");
         	webs.put(tree3,"https://zh.wikipedia.org/zh-tw/%E5%88%80%E5%8A%8D%E7%A5%9E%E5%9F%9F");
     		
+        	tree1.eularPrintTree();
+        	tree2.eularPrintTree();
+        	tree3.eularPrintTree();
+        	
         	List<Map<String, String>> formattedResults = new ArrayList<>();
         	for (Map.Entry<WebTree, String> entry : webs.entrySet()) {
 	            WebTree webTree = entry.getKey();

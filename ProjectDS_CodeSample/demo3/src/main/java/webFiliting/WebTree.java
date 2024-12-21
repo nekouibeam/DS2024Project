@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -22,7 +23,7 @@ public class WebTree {
 	private ArrayList<Keyword> keywords;
 	private String rootName;
 
-	public WebTree(WebPage rootPage) {
+	public WebTree(WebPage rootPage) throws SocketTimeoutException {
 		this.setRoot(new WebNode(rootPage));
 		this.rootName = rootPage.name;
 		keywords = GoogleQuery.keywordList;
