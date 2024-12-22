@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Demo</title>
+</head>
+<body>
+    <h1>Google Search Results</h1>
+    <input type="text" id="searchKeyword" placeholder="Enter keyword">
+    <button onclick="search()">Search</button>
+
+    <div id="results"></div>
+
+    <script>
+        async function search() {
+            const keyword = document.getElementById("searchKeyword").value;
+            const response = await fetch(`/search?keyword=${encodeURIComponent(keyword)}`);
+            const results = await response.json();
+            
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = ""; // 清空先前的結果
+
+            for (const result of results) {
+                const resultItem = document.createElement("p");
+                if (result.error) {
+                    resultItem.innerHTML = `<strong>Error:</strong> ${result.error}`;
+                } else {
+                    resultItem.innerHTML = `<strong>${result.title}</strong>: <a href="${result.url}" target="_blank">${result.url}</a> (出現次數: ${result.count})`;
+                }
+                resultsDiv.appendChild(resultItem);
+            }
+        }
+    </script>
+</body>
+</html>
