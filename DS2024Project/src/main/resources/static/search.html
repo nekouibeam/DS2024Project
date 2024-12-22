@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Bookle Search</title>
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+        <style>
+            .logo {
+                font-family: 'Pacifico', cursive;
+                background: linear-gradient(45deg, #4285f4, #34a853, #fbbc05, #ea4335);
+                -webkit-background-clip: text;
+                background-clip: text;
+                color: transparent;
+            }
+    
+            .search-container {
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+    
+            .result-card {
+                transition: transform 0.2s, box-shadow 0.2s;
+            }
+    
+            .result-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            }
+    
+            .initial-search {
+                transition: all 0.3s ease;
+            }
+    
+            .compact-search {
+                transition: all 0.3s ease;
+            }
+            /* 將內容置中 */
+            .centered-container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+    
+            /* 調整搜尋欄寬度 */
+            .search-container {
+                width: 60%; /* 縮小寬度 */
+                max-width: 600px; /* 設定最大寬度 */
+                padding: 10px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                border-radius: 25px;
+                display: flex;
+                align-items: center;
+            }
+    
+            /* 調整搜尋按鈕 */
+            .search-container button {
+                background-color: #4285f4;
+                color: white;
+                border: none;
+                border-radius: 20px;
+                padding: 12px 24px; /* 調整按鈕大小 */
+                font-size: 16px; /* 字體大小 */
+                cursor: pointer;
+                white-space: nowrap; /* 避免換行 */
+                transition: background-color 0.3s ease;
+            }
+    
+            .search-container button:hover {
+                background-color: #357ae8;
+            }
+    
+            /* 搜尋框 */
+            .search-container input {
+                flex: 1;
+                border: none;
+                outline: none;
+                font-size: 16px;
+                padding: 8px 12px;
+            }
+    
+        </style>
+    </head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 初始搜索页面 -->
+    <div id="initialSearchPage" class="flex flex-col justify-center items-center min-h-screen">
+        <h1 class="logo text-6xl mb-8 text-center">Bookle</h1>
+        <div class="search-container bg-white shadow-lg rounded-full p-4 flex items-center max-w-xl w-full">
+            <input type="text" id="initialSearchKeyword" 
+                   class="flex-grow px-4 py-2 outline-none text-lg"
+                   placeholder="搜尋你想要的書籍...">
+            <button onclick="performSearch('initialSearchKeyword', 1)" 
+                    class="bg-blue-500 text-white px-6 py-2 rounded-full hover:bg-blue-600 transition-colors">
+                搜尋
+            </button>
+        </div>
+        <div class="flex justify-center space-x-4 mt-6">
+            <button onclick="performSearch('initialSearchKeyword', 2)" 
+                    class="px-4 py-2 text-sm bg-gray-200 rounded-full hover:bg-gray-300 transition-colors">
+                實體書目
+            </button>
+            <button onclick="performSearch('initialSearchKeyword', 3)" 
+                    class="px-4 py-2 text-sm bg-gray-200 rounded-full hover:bg-gray-300 transition-colors">
+                同人作品
+            </button>
+        </div>
+    </div>
+    
+    <!-- 搜索结果页面 -->
+    <div id="resultsPage" class="hidden container mx-auto px-4 py-8">
+        <div id="compactSearchBar" class="bg-white shadow-md sticky top-0 z-10">
+            <div class="flex items-center py-3">
+                <h1 onclick="backToInitial()" class="logo text-2xl mr-6 cursor-pointer">Bookle</h1>
+                <div class="search-container bg-gray-100 rounded-full flex items-center flex-1">
+                    <input type="text" id="compactSearchKeyword" 
+                           class="flex-grow px-4 py-2 bg-transparent outline-none"
+                           placeholder="搜尋你想要的書籍...">
+                    <button onclick="performSearch('compactSearchKeyword', currentSearchType)" 
+                            class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition-colors text-sm">
+                        搜尋
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- ... (rest of the results page HTML remains the same) ... -->
+    </div>
+    
+    <script>
+    let currentSearchType = 1; // 默認搜索類型：小說
+
+    function backToInitial() {
+        document.getElementById('initialSearchPage').classList.remove('hidden');
+        document.getElementById('resultsPage').classList.add('hidden');
+    }
+
+    async function performSearch(inputId, searchType) {
+        const keyword = document.getElementById(inputId).value.trim();
+        if (!keyword) {
+            alert('請輸入搜尋關鍵字！');
+            return;
+        }
+
+        currentSearchType = searchType; // 保存當前搜索類型
+
+        // 隱藏初始頁面，顯示結果頁面
+        document.getElementById('initialSearchPage').classList.add('hidden');
+        document.getElementById('resultsPage').classList.remove('hidden');
+
+        // 發送 API 請求到後端
+        try {
+            const response = await fetch(`/search${searchType}?keyword=${encodeURIComponent(keyword)}`);
+            const results = await response.json();
+
+            // 更新結果計數
+            const resultCount = results.length;
+            document.getElementById('resultCount').textContent = `找到 ${resultCount} 個結果`;
+
+            // 更新推薦關鍵字
+            const searchTypeText = searchType === 1 ? '小說' : searchType === 2 ? '實體書' : '同人作品';
+            document.getElementById('suggestedKeyword1').textContent = `與 "${keyword}" 相關的${searchTypeText}`;
+            document.getElementById('suggestedKeyword2').textContent = `熱門${searchTypeText}推薦`;
+
+            // 顯示搜索結果
+            const resultsList = document.getElementById('resultsList');
+            resultsList.innerHTML = "";
+            results.forEach(result => {
+                const resultItem = document.createElement("div");
+                resultItem.className = "result-card bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow";
+                resultItem.innerHTML = `
+                    <h2 class="text-xl font-semibold text-blue-600 mb-2">
+                        <a href="${result.url}" target="_blank" class="hover:underline">${result.title}</a>
+                    </h2>
+                    <p class="text-gray-600 text-sm truncate">${result.url}</p>
+                `;
+                resultsList.appendChild(resultItem);
+            });
+
+        } catch (error) {
+            console.error('Error fetching search results:', error);
+            alert('搜尋過程中發生錯誤，請稍後再試。');
+        }
+    }
+    </script>
+</body>
+</html>
