@@ -5,14 +5,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.UnknownHostException;
-import java.util.TreeMap;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -69,24 +69,23 @@ public class GoogleQuery {
 		return retVal;
 	}
 
-	public TreeMap<WebTree, String> query() throws IOException {
+	public List<Map.Entry<WebTree, String>> query() throws IOException {
 		if (content == null) {
 			content = fetchContent();
 		}
-		Comparator<WebTree> comparator = new Comparator<WebTree>() {
-			@Override
-			public int compare(WebTree x, WebTree y) {
-				// 使用 Double.compare 方法比較分數以避免強制轉換錯誤
-				return Double.compare(y.getRoot().nodeScore, x.getRoot().nodeScore);
-			}
-		};
-		TreeMap<WebTree, String> webs = new TreeMap<WebTree, String>(comparator);
+		
+		List<Map.Entry<WebTree, String>> webs = new ArrayList<>();
 		// using Jsoup analyze html string
 		Document doc = Jsoup.parse(content);
 		// select particular element(tag) which you want
 		Elements lis = doc.select("div");
 		lis = lis.select(".kCrYT");
+		int time = 0;
 		for (Element li : lis) {
+			if(time>10) {
+				break;
+			}
+			
 			try {
 				String citeUrl = li.select("a").get(0).attr("href").replace("/url?q=", "");
 				citeUrl = URLDecoder.decode(citeUrl, "UTF-8");
@@ -106,25 +105,41 @@ public class GoogleQuery {
 				if (isValidURL(citeUrl)) {
 					try {
 						WebPage page = new WebPage(citeUrl, title);
-						webs.put(new WebTree(page), citeUrl);
+						webs.add(Map.entry(new WebTree(page), citeUrl));
 					} catch (Exception e) {
 						// TODO: handle exception
 						String fullMessage = e.toString(); // e.toString() 包含完整類名和訊息
 						String firstLine = fullMessage.split("\n")[0]; // 提取第一行訊息
 						System.out.println(firstLine);
 						continue;
-					}	
+					}
 				}
 
 			} catch (IndexOutOfBoundsException e) {
 				continue;
 			}
+			time++;
 		}
+		
+		// Sort the list based on nodeScore in descending order
+		  webs.sort((entry1, entry2) -> Double.compare(
+		      entry2.getKey().getRoot().nodeScore, 
+		      entry1.getKey().getRoot().nodeScore
+		  ));
+		  
+		  // Verify sorted results
+		    System.out.println("Sorted results:");
+		    webs.forEach(entry -> {
+		        System.out.println("Title: " + entry.getKey().getRoot().webPage.name 
+		            + " Score: " + entry.getKey().getRoot().nodeScore);
+		    });
+		    
 		return webs;
 	}
 
 	private boolean isValidURL(String citeUrl) {
 		try {
+			@SuppressWarnings("unused")
 			URLConnection conn = new URL(citeUrl).openConnection();
 		} catch (MalformedURLException e) {
 			System.out.printf("MalformedURLException, skip");
@@ -141,11 +156,7 @@ public class GoogleQuery {
 
 	public static void createKeywordList() {
 		keywordList = new ArrayList<>();
-		keywordList.add(new Keyword("ISBN", 20));
-		keywordList.add(new Keyword("作者", 15));
-		keywordList.add(new Keyword("書評", 15));
-		// keywordList.add(new Keyword("免費觀看", 12));
-		// keywordList.add(new Keyword("付費觀看", 10));
-		// keywordList.add(new Keyword("同人作品", 8));
+		keywordList.add(new Keyword("免費", 20));
+		keywordList.add(new Keyword("線上", 15));
 	}
 }

@@ -20,17 +20,11 @@ public class SearchController {
 	    GoogleQuery googleQuery = new GoogleQuery(keyword," 小說");
 	    List<Map<String, String>> formattedResults = new ArrayList<>();
 	    
-	    //for testing
-	    System.out.println("output all scores:");
-	    
 	    try {
-	        Map<WebTree, String> results = googleQuery.query();
-	        for (Map.Entry<WebTree, String> entry : results.entrySet()) {
+	    	List<Map.Entry<WebTree, String>> results = googleQuery.query();
+	        for (Map.Entry<WebTree, String> entry : results) {
 	            WebTree webTree = entry.getKey();
 	            String url = entry.getValue();
-	            
-	            //for testing
-	    	    System.out.println(webTree.getRoot().webPage.score);
 	            
 	            // 將 WebTree 和 URL 組裝成結構化 JSON
 	            Map<String, String> formattedEntry = new HashMap<>();

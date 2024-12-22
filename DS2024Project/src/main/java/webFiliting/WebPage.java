@@ -46,9 +46,6 @@ public class WebPage {
         } catch (Exception e) {
             e.printStackTrace();  // 捕獲所有其他異常並打印
         }
-        System.out.println();
-        System.out.println("Total score: " + this.score);
-        System.out.println();
     }
     
     public void setHtmlString(String g) {

@@ -1,20 +1,8 @@
 package webFiliting;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLDecoder;
 import java.util.ArrayList;
-
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import com.example.demo.GoogleQuery;
 
@@ -39,6 +27,7 @@ public class WebTree {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		eularPrintTree();
 	}
 
 	public void getSubWebPage(WebNode rootNode) throws IOException {
@@ -61,20 +50,6 @@ public class WebTree {
 			startNode.setNodeScore(keywords);
 		}
 	}
-	
-	@Override
-	public boolean equals(Object obj) {
-	    if (this == obj) return true;
-	    if (obj == null || getClass() != obj.getClass()) return false;
-	    WebTree webTree = (WebTree) obj;
-	    return Double.compare(webTree.getRoot().nodeScore, getRoot().nodeScore) == 0;
-	}
-
-	@Override
-	public int hashCode() {
-	    return Double.hashCode(getRoot().nodeScore);
-	}
-
 
 	public void eularPrintTree() {
 		eularPrintTree(getRoot());
