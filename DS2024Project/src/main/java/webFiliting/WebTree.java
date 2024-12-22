@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -18,13 +20,13 @@ import com.example.demo.GoogleQuery;
 
 public class WebTree {
 	private WebNode root;
-	private ArrayList<Keyword> keywords = GoogleQuery.keywordList;
+	private ArrayList<Keyword> keywords;
 	private String rootName;
 
-	public WebTree(WebPage rootPage) {
+	public WebTree(WebPage rootPage) throws SocketTimeoutException {
 		this.setRoot(new WebNode(rootPage));
 		this.rootName = rootPage.name;
-		keywords = new ArrayList<Keyword>();
+		keywords = GoogleQuery.keywordList;
 		try {
 			getSubWebPage(this.getRoot());
 		} catch (Exception e) {
@@ -39,49 +41,9 @@ public class WebTree {
 		}
 	}
 
-	private String fetchContent(String url) throws IOException {
-		String retVal = "";
-
-		URL u = new URL(url);
-		URLConnection conn = u.openConnection();
-		// set HTTP header
-		//當程式需要以自動化方式訪問網頁時，使用 User-Agent 模擬瀏覽器，讓伺服器誤認為這是一個真實的瀏覽器訪問。
-		conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
-		InputStream in = conn.getInputStream();
-
-		InputStreamReader inReader = new InputStreamReader(in, "utf-8");
-		BufferedReader bufReader = new BufferedReader(inReader);
-		String line = null;
-
-		while ((line = bufReader.readLine()) != null) {
-			retVal += line;
-		}
-		return retVal;
-	}
-
 	public void getSubWebPage(WebNode rootNode) throws IOException {
-		String rootContentString;
-		// Document doc = Jsoup.connect(rootUrlString).get();
-		rootContentString = fetchContent(rootNode.webPage.url);
-		Document doc = Jsoup.parse(rootContentString);
-
-		Elements links = doc.select("a[href]");
-		int subWebNum = 0;
-		for (Element link : links) {
-			String href = link.attr("href");
-			href = URLDecoder.decode(href, "UTF-8");
-			// Check if the href is a valid URL
-			if (subWebNum > 1)
-				break;
-			try {
-				subWebNum++;
-				new URL(href);
-				this.getRoot().addChild(new WebNode(new WebPage(href, link.text())));
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println("Skipping invalid URL: " + href);
-			}
-		}
+	   SubWebpageGetter getter = new SubWebpageGetter();
+	   getter.getSubWebPage(rootNode);
 	}
 
 	public void setPostOrderScore(ArrayList<Keyword> keywords) throws IOException {
@@ -99,6 +61,20 @@ public class WebTree {
 			startNode.setNodeScore(keywords);
 		}
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+	    if (this == obj) return true;
+	    if (obj == null || getClass() != obj.getClass()) return false;
+	    WebTree webTree = (WebTree) obj;
+	    return Double.compare(webTree.getRoot().nodeScore, getRoot().nodeScore) == 0;
+	}
+
+	@Override
+	public int hashCode() {
+	    return Double.hashCode(getRoot().nodeScore);
+	}
+
 
 	public void eularPrintTree() {
 		eularPrintTree(getRoot());

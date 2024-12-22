@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
@@ -26,7 +27,7 @@ public class GoogleQuery {
 	public String content;
 	public static ArrayList<Keyword> keywordList;
 
-	public GoogleQuery(String searchKeyword) {
+	public GoogleQuery(String searchKeyword, String searchType) {
 		this.searchKeyword = searchKeyword;
 		createKeywordList();
 		for (Keyword keyword : keywordList) {
@@ -38,7 +39,7 @@ public class GoogleQuery {
 			// and use the line of code in the lower section.
 			// Also, consider why the results might be incorrect
 			// when entering Chinese keywords.
-			String encodeKeyword = java.net.URLEncoder.encode(searchKeyword, "utf-8");
+			String encodeKeyword = java.net.URLEncoder.encode((searchKeyword + searchType), "utf-8");
 			this.url = "https://www.google.com/search?q=" + encodeKeyword + "&oe=utf8&num=20";
 
 			// this.url =
@@ -54,7 +55,7 @@ public class GoogleQuery {
 		URL u = new URL(url);
 		URLConnection conn = u.openConnection();
 		// set HTTP header
-		//當程式需要以自動化方式訪問網頁時，使用 User-Agent 模擬瀏覽器，讓伺服器誤認為這是一個真實的瀏覽器訪問。
+		// 當程式需要以自動化方式訪問網頁時，使用 User-Agent 模擬瀏覽器，讓伺服器誤認為這是一個真實的瀏覽器訪問。
 		conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
 		InputStream in = conn.getInputStream();
 
@@ -73,11 +74,10 @@ public class GoogleQuery {
 			content = fetchContent();
 		}
 		Comparator<WebTree> comparator = new Comparator<WebTree>() {
-
 			@Override
 			public int compare(WebTree x, WebTree y) {
-				// 降序排列
-				return (int) (y.getRoot().nodeScore - x.getRoot().nodeScore);
+				// 使用 Double.compare 方法比較分數以避免強制轉換錯誤
+				return Double.compare(y.getRoot().nodeScore, x.getRoot().nodeScore);
 			}
 		};
 		TreeMap<WebTree, String> webs = new TreeMap<WebTree, String>(comparator);
@@ -102,9 +102,18 @@ public class GoogleQuery {
 
 				System.out.println("Title: " + title + " , url: " + citeUrl);
 
-				// put title and pair into HashMap
+				// put title and pair into TreeMap
 				if (isValidURL(citeUrl)) {
-					webs.put(new WebTree(new WebPage(citeUrl, title)), citeUrl);
+					try {
+						WebPage page = new WebPage(citeUrl, title);
+						webs.put(new WebTree(page), citeUrl);
+					} catch (Exception e) {
+						// TODO: handle exception
+						String fullMessage = e.toString(); // e.toString() 包含完整類名和訊息
+						String firstLine = fullMessage.split("\n")[0]; // 提取第一行訊息
+						System.out.println(firstLine);
+						continue;
+					}	
 				}
 
 			} catch (IndexOutOfBoundsException e) {
@@ -135,8 +144,8 @@ public class GoogleQuery {
 		keywordList.add(new Keyword("ISBN", 20));
 		keywordList.add(new Keyword("作者", 15));
 		keywordList.add(new Keyword("書評", 15));
-		keywordList.add(new Keyword("免費觀看", 12));
-		keywordList.add(new Keyword("付費觀看", 10));
-		keywordList.add(new Keyword("同人作品", 8));
+		// keywordList.add(new Keyword("免費觀看", 12));
+		// keywordList.add(new Keyword("付費觀看", 10));
+		// keywordList.add(new Keyword("同人作品", 8));
 	}
 }
