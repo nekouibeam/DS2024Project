@@ -15,9 +15,24 @@ import java.util.Map;
 @RestController
 public class SearchController {
 
-	@GetMapping("/search")
-	public List<Map<String, String>> search(@RequestParam String keyword) {
-	    GoogleQuery googleQuery = new GoogleQuery(keyword," 小說");
+	@GetMapping("/search1")
+    public List<Map<String, String>> searchNovel(@RequestParam String keyword) {
+        return search(keyword, " 小說");
+    }
+
+    @GetMapping("/search2")
+    public List<Map<String, String>> searchPhysical(@RequestParam String keyword) {
+        return search(keyword, " 實體書");
+    }
+
+    @GetMapping("/search3")
+    public List<Map<String, String>> searchFanfic(@RequestParam String keyword) {
+        return search(keyword, " 同人");
+    }
+    
+    
+	public List<Map<String, String>> search(String keyword, String type) {
+	    GoogleQuery googleQuery = new GoogleQuery(keyword,type);
 	    List<Map<String, String>> formattedResults = new ArrayList<>();
 	    
 	    try {

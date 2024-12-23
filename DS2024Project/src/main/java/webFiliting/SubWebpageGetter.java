@@ -31,7 +31,7 @@ public class SubWebpageGetter {
             String href = link.attr("href");
             href = URLDecoder.decode(href, "UTF-8");
 
-            if (subWebNum > 1 || tryTime > 4)
+            if (subWebNum > 0 || tryTime > 3)
                 break;
 
             if (!isValidLink(href, baseUrl, link)) {
