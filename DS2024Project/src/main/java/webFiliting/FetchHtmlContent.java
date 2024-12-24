@@ -14,6 +14,7 @@ public class FetchHtmlContent {
         // 使用 Jsoup 訪問網頁並設置 User-Agent
         Document doc = Jsoup.connect(url)
                 .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.6056.2 Safari/537.36")
+                .timeout(2000) // 設定超時時間為 1 秒（1000 毫秒）
                 .get();
 
         // 返回網頁內容

@@ -128,7 +128,8 @@ public class GoogleQuery {
 		  ));
 		  
 		  // Verify sorted results
-		    System.out.println("Sorted results:");
+		  	
+		    System.out.println("\n" + "Sorted results:");
 		    webs.forEach(entry -> {
 		        System.out.println("Title: " + entry.getKey().getRoot().webPage.name 
 		            + " Score: " + entry.getKey().getRoot().nodeScore);

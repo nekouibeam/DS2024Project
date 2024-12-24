@@ -32,6 +32,10 @@ public class SearchController {
     
     
 	public List<Map<String, String>> search(String keyword, String type) {
+		
+		// 記錄開始時間
+	    long startTime = System.nanoTime();
+	    
 	    GoogleQuery googleQuery = new GoogleQuery(keyword,type);
 	    List<Map<String, String>> formattedResults = new ArrayList<>();
 	    
@@ -55,8 +59,15 @@ public class SearchController {
 	        formattedResults.add(errorEntry);
 	    }
 	    
+	    // 記錄結束時間
+	    long endTime = System.nanoTime();	    
+	    // 計算執行時間（毫秒）
+	    long executionTime = (endTime - startTime) / 1_000_000;
+	    // 後端輸出執行時間
+	    System.out.println("\n" + "Execution time for searching: " + executionTime + " ms");
+	    
 	    //for testing
-	    System.out.println("Formatted Results:");
+	    System.out.println("\n" + "Formatted Results:");
     	for (Map<String, String> result : formattedResults) {
     	    System.out.println("Title: " + result.get("title"));
     	    System.out.println("URL: " + result.get("url"));

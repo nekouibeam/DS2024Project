@@ -18,7 +18,7 @@ public class SubWebpageGetter {
         processLinks(rootNode, rootNode.webPage.htmlString);
     }
 
-    private void processLinks(WebNode parentNode, String contentString) throws IOException {
+    private void processLinks(WebNode parentNode, String contentString) throws IOException { 
         Document doc = Jsoup.parse(contentString);
         String baseUrl = UrlUtils.extractBaseUrl(parentNode.webPage.url);
 
@@ -27,15 +27,22 @@ public class SubWebpageGetter {
         int subWebNum = 0;
         int tryTime = 0;
 
-        for (Element link : allLinks) {
+        // 定義跳步的質數
+        int primeStep = 7; // 可以更改為其他質數
+        int i = 0;
+
+        // 使用 while 循環，確保能回到未處理的連結
+        while (subWebNum <= 1 && tryTime <= 5) {
+        	if(allLinks.size() == 0) {
+        		break;
+        	}
+            Element link = allLinks.get(i % allLinks.size()); // 使用 % 確保索引有效
             String href = link.attr("href");
             href = URLDecoder.decode(href, "UTF-8");
 
-            if (subWebNum > 0 || tryTime > 3)
-                break;
-
             if (!isValidLink(href, baseUrl, link)) {
                 tryTime++;
+                i += primeStep; // 跳過該連結，按質數跳步
                 continue;
             }
 
@@ -44,16 +51,15 @@ public class SubWebpageGetter {
             }
 
             try {
-                new URL(href);
+                new URL(href); // 驗證 URL 是否有效
                 WebNode childNode = new WebNode(new WebPage(href, link.text()));
                 parentNode.addChild(childNode);
                 subWebNum++;
 
-                // Recursively fetch second layer of subpages
+                // 遞迴處理子頁面
                 if (parentNode.getDepth() == 1) {
                     processLinks(childNode, childNode.webPage.htmlString);
                 }
-
             } catch (MalformedURLException e) {
                 logError("Invalid URL", href, e);
                 tryTime++;
@@ -66,8 +72,11 @@ public class SubWebpageGetter {
                 logError("General Exception", href, e);
                 tryTime++;
             }
+
+            i += primeStep; // 跳步加質數
         }
     }
+
 
     private Elements filterLinks(Document doc, String url) {
         Elements allLinks = doc.select("a[href]");
