@@ -158,5 +158,13 @@ public class GoogleQuery {
 		keywordList = new ArrayList<>();
 		keywordList.add(new Keyword("免費", 20));
 		keywordList.add(new Keyword("線上", 15));
+		keywordList.add(new Keyword("同人", 25)); 
+		keywordList.add(new Keyword("ISBN", 25));
+		keywordList.add(new Keyword("作者", 20));
+		keywordList.add(new Keyword("書評", 18));   
+		keywordList.add(new Keyword("實體書", 20));    
+		keywordList.add(new Keyword("圖書館", 18));    
+		keywordList.add(new Keyword("書店", 15));   
+		keywordList.add(new Keyword("出版年份", 15));   
 	}
 }
