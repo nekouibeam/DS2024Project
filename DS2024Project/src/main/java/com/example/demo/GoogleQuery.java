@@ -1,9 +1,6 @@
 package com.example.demo;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -12,7 +9,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+//import java.util.Random;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -48,15 +45,19 @@ public class GoogleQuery {
 			System.out.println(e.getMessage());
 		}
 	}
-
+	
 	private String fetchContent() throws IOException {
 		String retVal = "";
-
-		URL u = new URL(url);
+		FetchHtmlContent fetchHtmlContent = new FetchHtmlContent();
+		retVal = fetchHtmlContent.fetchContent(url);
+		/*URL u = new URL(url);
 		URLConnection conn = u.openConnection();
+		
 		// set HTTP header
 		// 當程式需要以自動化方式訪問網頁時，使用 User-Agent 模擬瀏覽器，讓伺服器誤認為這是一個真實的瀏覽器訪問。
-		conn.setRequestProperty("User-agent", "Chrome/107.0.5304.107");
+		String userAgent = getRandomUserAgent();
+	    conn.setRequestProperty("User-agent", userAgent);
+	    
 		InputStream in = conn.getInputStream();
 
 		InputStreamReader inReader = new InputStreamReader(in, "utf-8");
@@ -65,7 +66,7 @@ public class GoogleQuery {
 
 		while ((line = bufReader.readLine()) != null) {
 			retVal += line;
-		}
+		}*/
 		return retVal;
 	}
 
@@ -114,9 +115,13 @@ public class GoogleQuery {
 						continue;
 					}
 				}
-
+ 				// 添加随机延迟
+        		//Thread.sleep(new Random().nextInt(100) + 300); // 随机延迟1到4秒
 			} catch (IndexOutOfBoundsException e) {
 				continue;
+			} catch (Exception e) {
+				// TODO: handle exception
+				e.printStackTrace();
 			}
 			time++;
 		}
