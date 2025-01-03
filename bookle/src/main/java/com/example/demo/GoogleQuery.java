@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.lang.Thread;
 
 
 import org.jsoup.Jsoup;
@@ -51,6 +52,15 @@ public class GoogleQuery {
 
 	private String fetchContent() throws IOException {
 		String retVal = "";
+		
+	    Thread sleepThread = new Thread(() -> {
+	        try {
+	            Thread.sleep(1000);  // Sleep for 1 second
+	        } catch (InterruptedException e) {
+	            e.printStackTrace();
+	            Thread.currentThread().interrupt(); // Handle interruption
+	        }
+	    });
 
 		URL u = new URL(url);
 		URLConnection conn = u.openConnection();
@@ -82,7 +92,7 @@ public class GoogleQuery {
 		lis = lis.select(".kCrYT");
 		int time = 0;
 		for (Element li : lis) {
-			if(time>10) {
+			if(time>7) {
 				break;
 			}
 			
@@ -119,8 +129,8 @@ public class GoogleQuery {
 				continue;
 			}
 			time++;
-		}
-		
+		}	
+	    
 		// Sort the list based on nodeScore in descending order
 		  webs.sort((entry1, entry2) -> Double.compare(
 		      entry2.getKey().getRoot().nodeScore, 
@@ -135,6 +145,47 @@ public class GoogleQuery {
 		    });
 		    
 		return webs;
+	}
+	
+	// In GoogleQuery.java, add this new method:　　　今日新增
+	public List<String> getRelatedSearches() throws IOException {
+	    if (content == null) {
+	        content = fetchContent();
+	    }
+	    
+	    List<String> relatedSearches = new ArrayList<>();
+	    Document doc = Jsoup.parse(content);
+	    
+	    // 嘗試多個可能的選擇器
+	    Elements relatedElements = doc.select("div.BNeawe");
+	    if (relatedElements.isEmpty()) {
+	        relatedElements = doc.select("div.s75CSd");
+	    }
+	    if (relatedElements.isEmpty()) {
+	        relatedElements = doc.select("div.card-section");
+	    }
+	    
+	    // 為了測試，添加一些預設的相關搜索
+	    if (relatedElements.isEmpty()) {
+	        // 根據搜索關鍵字添加相關建議
+	        String baseKeyword = searchKeyword.replace(" 小說", "")
+	                                        .replace(" 實體書", "")
+	                                        .replace(" 同人", "");
+	        relatedSearches.add(baseKeyword + " 推薦");
+	        relatedSearches.add(baseKeyword + " 排行榜");
+	        relatedSearches.add(baseKeyword + " 評價");
+	        relatedSearches.add(baseKeyword + " 作者");
+	        relatedSearches.add(baseKeyword + " 系列");
+	    } else {
+	        for (Element element : relatedElements) {
+	            String relatedSearch = element.text().trim();
+	            if (!relatedSearch.isEmpty() && !relatedSearches.contains(relatedSearch)) {
+	                relatedSearches.add(relatedSearch);
+	            }
+	        }
+	    }
+	    
+	    return relatedSearches;
 	}
 
 	private boolean isValidURL(String citeUrl) {

@@ -14,39 +14,43 @@ import java.util.Map;
 
 @RestController
 public class SearchController {
-
+	//endpoint methods:
 	@GetMapping("/search1")
-    public List<Map<String, String>> searchNovel(@RequestParam String keyword) {
-        return search(keyword, " 小說");
-    }
+	public Map<String, Object> searchNovel(@RequestParam String keyword) {
+	    return search(keyword, " 小說");
+	}
 
-    @GetMapping("/search2")
-    public List<Map<String, String>> searchPhysical(@RequestParam String keyword) {
-        return search(keyword, " 實體書");
-    }
+	@GetMapping("/search2")
+	public Map<String, Object> searchPhysical(@RequestParam String keyword) {
+	    return search(keyword, " 實體書");
+	}
 
-    @GetMapping("/search3")
-    public List<Map<String, String>> searchFanfic(@RequestParam String keyword) {
-        return search(keyword, " 同人");
-    }
+	@GetMapping("/search3")
+	public Map<String, Object> searchFanfic(@RequestParam String keyword) {
+	    return search(keyword, " 同人");
+	}
     
-    
-	public List<Map<String, String>> search(String keyword, String type) {
-	    GoogleQuery googleQuery = new GoogleQuery(keyword,type);
+	public Map<String, Object> search(String keyword, String type) {
+	    GoogleQuery googleQuery = new GoogleQuery(keyword, type);
+	    Map<String, Object> response = new HashMap<>();
 	    List<Map<String, String>> formattedResults = new ArrayList<>();
+	    List<String> relatedSearches = new ArrayList<>();
 	    
 	    try {
-	    	List<Map.Entry<WebTree, String>> results = googleQuery.query();
+	        List<Map.Entry<WebTree, String>> results = googleQuery.query();
 	        for (Map.Entry<WebTree, String> entry : results) {
 	            WebTree webTree = entry.getKey();
 	            String url = entry.getValue();
 	            
-	            // 將 WebTree 和 URL 組裝成結構化 JSON
 	            Map<String, String> formattedEntry = new HashMap<>();
-	            formattedEntry.put("title", webTree.getRootName()); // 假設 WebTree 有 getRootName 方法
+	            formattedEntry.put("title", webTree.getRootName());
 	            formattedEntry.put("url", url);
 	            formattedResults.add(formattedEntry);
 	        }
+	        
+	        // Get related searches
+	        relatedSearches = googleQuery.getRelatedSearches();
+	        
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	        Map<String, String> errorEntry = new HashMap<>();
@@ -62,9 +66,11 @@ public class SearchController {
     	    System.out.println("URL: " + result.get("url"));
     	    System.out.println("----------------------");
     	}
-    	
-    	//return
-	    return formattedResults;
+	    
+	    // Package both results and related searches in the response
+	    response.put("results", formattedResults);
+	    response.put("relatedSearches", relatedSearches);
+	    
+	    return response;
 	}
-
 }

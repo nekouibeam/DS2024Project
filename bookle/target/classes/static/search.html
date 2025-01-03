@@ -28,7 +28,6 @@
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             }
     
-	        /* 添加新的樣式增強 */
 	        .search-container input {
 	            transition: background-color 0.3s;
 	        }
@@ -37,7 +36,6 @@
 	            background-color: rgba(66, 133, 244, 0.05);
 	        }
 	
-	        /* 搜尋按鈕漸變效果 */
 	        .search-button {
 	            background: linear-gradient(45deg, #4285f4, #357ae8);
 	            transition: transform 0.2s, filter 0.2s;
@@ -48,7 +46,6 @@
 	            transform: translateY(-1px);
 	        }
 	
-	        /* 結果卡片增強 */
 	        .result-card {
 	            border-left: 3px solid transparent;
 	            transition: all 0.3s ease;
@@ -58,7 +55,6 @@
 	            border-left-color: #4285f4;
 	        }
 	
-	        /* 標籤動畫效果 */
 	        .tag-button {
 	            position: relative;
 	            overflow: hidden;
@@ -80,7 +76,6 @@
 	            transform: scaleX(1);
 	        }
 	
-	        /* 添加漸入動畫 */
 	        @keyframes fadeIn {
 	            from { opacity: 0; transform: translateY(10px); }
 	            to { opacity: 1; transform: translateY(0); }
@@ -118,7 +113,6 @@
     
     <!-- 搜索結果頁面 -->
     <div id="resultsPage" class="hidden container mx-auto px-4 py-8">
-        <!-- 保留原有結構，添加過渡效果 -->
         <div id="compactSearchBar" class="bg-white shadow-md sticky top-0 z-10 fade-in">
             <div class="flex items-center py-3">
                 <h1 onclick="backToInitial()" class="logo text-2xl mr-6 cursor-pointer hover:scale-105 transition-transform">Bookle</h1>
@@ -144,13 +138,22 @@
                 </button>
             </div>
         </div>
+        
         <div id="resultsList" class="grid gap-4">
             <!-- 搜索結果會在這裡顯示 -->
+        </div>
+
+        <!-- 移動到底部的相關搜索 -->
+        <div id="relatedSearches" class="mt-12 pt-8 border-t border-gray-200 fade-in" style="animation-delay: 0.2s">
+            <h3 class="text-lg font-semibold mb-3">其他人也搜尋：</h3>
+            <div class="flex flex-wrap gap-2" id="relatedSearchesList">
+                <!-- Related searches will be inserted here -->
+            </div>
         </div>
     </div>
 </body>
 <script>
-    let currentSearchType = 1; // 默認搜索類型：小說
+    let currentSearchType = 1;
 
     function backToInitial() {
         document.getElementById('initialSearchPage').classList.remove('hidden');
@@ -164,36 +167,45 @@
             return;
         }
 
-        currentSearchType = searchType; // 保存當前搜索類型
+        currentSearchType = searchType;
 
-        // 隱藏初始頁面，顯示結果頁面
         document.getElementById('initialSearchPage').classList.add('hidden');
         document.getElementById('resultsPage').classList.remove('hidden');
 
-        // 發送 API 請求到後端
         try {
             const response = await fetch(`/search${searchType}?keyword=${encodeURIComponent(keyword)}`);
             if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
+                throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            // 处理 results
-            const results = await response.json();
+            const data = await response.json();
+            const results = data.results;
+            const relatedSearches = data.relatedSearches.slice(0, 10); // 限制只顯示前10個相關搜索
           
-            // 更新結果計數
             const count = results.length;
             document.getElementById('resultCount').textContent = `找到 ${count} 個結果`;
 
-            // 更新推薦關鍵字
             const searchTypeText = searchType === 1 ? '小說' : searchType === 2 ? '實體書' : '同人作品';
             document.getElementById('suggestedKeyword1').textContent = `與 "${keyword}" 相關的${searchTypeText}`;
             document.getElementById('suggestedKeyword2').textContent = `熱門${searchTypeText}推薦`;
-
-            // 顯示搜索結果
+            
+            const relatedSearchesList = document.getElementById('relatedSearchesList');
+            relatedSearchesList.innerHTML = '';
+            relatedSearches.forEach(search => {
+                const button = document.createElement('button');
+                button.className = 'px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-sm transition-colors';
+                button.textContent = search;
+                button.onclick = () => {
+                    document.getElementById(inputId).value = search;
+                    performSearch(inputId, searchType);
+                };
+                relatedSearchesList.appendChild(button);
+            });
+	
             const resultsList = document.getElementById('resultsList');
-            resultsList.innerHTML = "";
+            resultsList.innerHTML = '';
             results.forEach((result, index) => {
-                const resultItem = document.createElement("div");
-                resultItem.className = "result-card bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow fade-in";
+                const resultItem = document.createElement('div');
+                resultItem.className = 'result-card bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow fade-in';
                 resultItem.style.animationDelay = `${index * 0.1}s`;
                 resultItem.innerHTML = `
                     <h2 class="text-xl font-semibold text-blue-600 mb-2">
@@ -203,11 +215,10 @@
                 `;
                 resultsList.appendChild(resultItem);
             });
-
         } catch (error) {
             console.error('Error fetching search results:', error);
             alert('搜尋過程中發生錯誤，請稍後再試。');
         }
     }
-    </script>
+</script>
 </html>
